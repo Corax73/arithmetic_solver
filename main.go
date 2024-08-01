@@ -1,13 +1,14 @@
 package main
 
 import (
-	"fmt"
+	"image/color"
 	"math/rand"
 	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/widget"
 )
@@ -20,19 +21,24 @@ type State struct {
 
 type Solver struct {
 	State
-	Input                 *widget.Entry
-	ScoreDisplay, Display *widget.Label
-	AppError              string
+	Input        *widget.Entry
+	TextSize     float32
+	Display      *widget.Label
+	ScoreDisplay *canvas.Text
+	AppError     string
 }
 
 func main() {
 	solverApp := app.New()
+	color := color.NRGBA{R: 120, G: 120, B: 200, A: 255}
 	solver := Solver{
 		Input:        widget.NewEntry(),
-		ScoreDisplay: widget.NewLabel("Score:"),
+		TextSize:     32,
+		ScoreDisplay: canvas.NewText("Score:", color),
 		Display:      widget.NewLabel(""),
 		AppError:     "incorrect data, try again. please.",
 	}
+	solver.ScoreDisplay.TextSize = solver.TextSize
 	window := solverApp.NewWindow("Solver")
 
 	btnExit := widget.NewButton("Exit", func() {
@@ -65,7 +71,6 @@ func (solver *Solver) getRandomValues() {
 
 func (solver *Solver) enterBtnHandler() *widget.Button {
 	return widget.NewButton("Enter", func() {
-		fmt.Println(solver.Input.Text)
 		solver.UserResult = solver.Input.Text
 		res := solver.Val1 + solver.Val2
 		userRes, err := strconv.Atoi(solver.UserResult)
@@ -99,7 +104,8 @@ func (solver *Solver) setScoreVal() {
 	var strBuilder strings.Builder
 	strBuilder.WriteString("Score: ")
 	strBuilder.WriteString(strconv.Itoa(solver.Score))
-	solver.ScoreDisplay.SetText(strBuilder.String())
+	solver.ScoreDisplay.Text = strBuilder.String()
+	solver.ScoreDisplay.Refresh()
 }
 
 func (solver *Solver) newBtnHandler() *widget.Button {
