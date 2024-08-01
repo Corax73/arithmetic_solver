@@ -34,24 +34,12 @@ func main() {
 		AppError:     "incorrect data, try again. please.",
 	}
 	window := solverApp.NewWindow("Solver")
-	input := widget.NewEntry()
-	input.SetPlaceHolder("Enter result")
 
 	btnExit := widget.NewButton("Exit", func() {
 		solverApp.Quit()
 	})
 
-	values := getRandomValues()
-	solver.Val1 = values[0]
-	solver.Val2 = values[1]
-	var strBuilder strings.Builder
-	strBuilder.WriteString(strconv.Itoa(solver.Val1))
-	strBuilder.WriteString("+")
-	strBuilder.WriteString(strconv.Itoa(solver.Val2))
-	newVal := strBuilder.String()
-	strBuilder.Reset()
-	solver.Display.SetText(newVal)
-	solver.ScoreDisplay.SetText(strconv.Itoa(solver.Score))
+	solver.newExpression()
 
 	window.SetContent(
 		container.NewGridWithColumns(
@@ -62,18 +50,17 @@ func main() {
 			),
 			solver.Input,
 			solver.enterBtnHandler(),
+			solver.newBtnHandler(),
 			btnExit,
 		),
 	)
-	window.Resize(fyne.NewSize(300, 200))
+	window.Resize(fyne.NewSize(500, 400))
 	window.ShowAndRun()
 }
 
-func getRandomValues() []int {
-	resp := make([]int, 2)
-	resp[0] = rand.Intn(11)
-	resp[1] = rand.Intn(11)
-	return resp
+func (solver *Solver) getRandomValues() {
+	solver.Val1 = rand.Intn(11)
+	solver.Val2 = rand.Intn(11)
 }
 
 func (solver *Solver) enterBtnHandler() *widget.Button {
@@ -86,12 +73,37 @@ func (solver *Solver) enterBtnHandler() *widget.Button {
 			if res == userRes {
 				solver.Display.SetText("Right!")
 				solver.Score = solver.Score + 1
-				solver.ScoreDisplay.SetText(strconv.Itoa(solver.Score))
+				solver.setScoreVal()
 			} else {
 				solver.Display.SetText("Wrong!")
 			}
 		} else {
 			solver.Display.SetText(err.Error())
 		}
+	})
+}
+
+func (solver *Solver) newExpression() {
+	solver.getRandomValues()
+	solver.Input.SetPlaceHolder("Enter result")
+	solver.Input.SetText("")
+	var strBuilder strings.Builder
+	strBuilder.WriteString(strconv.Itoa(solver.Val1))
+	strBuilder.WriteString("+")
+	strBuilder.WriteString(strconv.Itoa(solver.Val2))
+	solver.Display.SetText(strBuilder.String())
+	solver.setScoreVal()
+}
+
+func (solver *Solver) setScoreVal() {
+	var strBuilder strings.Builder
+	strBuilder.WriteString("Score: ")
+	strBuilder.WriteString(strconv.Itoa(solver.Score))
+	solver.ScoreDisplay.SetText(strBuilder.String())
+}
+
+func (solver *Solver) newBtnHandler() *widget.Button {
+	return widget.NewButton("New expression", func() {
+		solver.newExpression()
 	})
 }
