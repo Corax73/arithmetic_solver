@@ -28,12 +28,12 @@ type Solver struct {
 	State
 	Internationalization
 	Input                                *widget.Entry
-	TextSize                             float32
 	ExpDisplay, ResDisplay, ScoreDisplay *canvas.Text
 	BtnEnter                             *widget.Button
 	AppError                             string
 	SolverTheme                          fyne.Theme
 	LangToggler                          *widget.RadioGroup
+	TextSize                             float32
 }
 
 func main() {
@@ -164,6 +164,7 @@ func (solver *Solver) newExpression() {
 	strBuilder.WriteString(solver.Action)
 	strBuilder.WriteString(strconv.Itoa(solver.Val2))
 	solver.ExpDisplay.Text = strBuilder.String()
+	strBuilder.Reset()
 	solver.ExpDisplay.Refresh()
 	solver.ResDisplay.Text = ""
 	solver.ResDisplay.Refresh()
@@ -176,6 +177,7 @@ func (solver *Solver) setScoreVal() {
 	strBuilder.WriteString(solver.DataByLang[solver.Lang]["ScoreDisplay"])
 	strBuilder.WriteString(strconv.Itoa(solver.Score))
 	solver.ScoreDisplay.Text = strBuilder.String()
+	strBuilder.Reset()
 	solver.ScoreDisplay.Refresh()
 }
 
@@ -197,6 +199,7 @@ func (solver *Solver) refreshAllCanvas() {
 	strBuilder.WriteString(solver.DataByLang[solver.Lang]["ScoreDisplay"])
 	strBuilder.WriteString(strconv.Itoa(solver.Score))
 	solver.ScoreDisplay.Text = strBuilder.String()
+	strBuilder.Reset()
 	solver.ExpDisplay.Refresh()
 	solver.ResDisplay.Refresh()
 	solver.ScoreDisplay.Refresh()
