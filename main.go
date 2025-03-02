@@ -2,8 +2,8 @@ package main
 
 import (
 	"arithmetic_solver/customTheme"
+	"arithmetic_solver/randomizer"
 	"image/color"
-	"math/rand"
 	"strconv"
 	"strings"
 
@@ -15,9 +15,9 @@ import (
 )
 
 type State struct {
-	Val1, Val2, Score        int
-	Action, UserResult, Lang string
-	IsError                  bool
+	Val1, Val2, Score, Difficult int
+	Action, UserResult, Lang     string
+	IsError                      bool
 }
 
 type Internationalization struct {
@@ -103,22 +103,6 @@ func main() {
 	window.ShowAndRun()
 }
 
-func (solver *Solver) getRandomValues() {
-	actions := []string{" + ", " - "}
-	solver.Val1 = rand.Intn(11)
-	val2 := rand.Intn(11)
-	if solver.Val1 > val2 {
-		solver.Val2 = val2
-	} else if solver.Val1 < val2 {
-		valTemp := solver.Val1
-		solver.Val1 = val2
-		solver.Val2 = valTemp
-	} else {
-		solver.Val2 = val2
-	}
-	solver.Action = actions[rand.Intn(2)]
-}
-
 func (solver *Solver) enterBtnHandler() *widget.Button {
 	return widget.NewButton(solver.DataByLang[solver.Lang]["enterBtn"], func() {
 		solver.UserResult = solver.Input.Text
@@ -156,7 +140,7 @@ func (solver *Solver) btnEnable(btn *widget.Button) {
 }
 
 func (solver *Solver) newExpression() {
-	solver.getRandomValues()
+	solver.Val1, solver.Val2, solver.Action = randomizer.GetRandomValues(solver.Difficult)
 	solver.Input.SetPlaceHolder(solver.DataByLang[solver.Lang]["InputPlaceHolder"])
 	solver.Input.SetText("")
 	var strBuilder strings.Builder
