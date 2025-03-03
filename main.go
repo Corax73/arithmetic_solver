@@ -30,6 +30,7 @@ type Solver struct {
 	Input                                *widget.Entry
 	ExpDisplay, ResDisplay, ScoreDisplay *canvas.Text
 	BtnEnter                             *widget.Button
+	SelectDifficult                      *widget.Select
 	AppError                             string
 	SolverTheme                          fyne.Theme
 	LangToggler                          *widget.RadioGroup
@@ -59,6 +60,7 @@ func main() {
 			"ResultWrong":      "Ошибка!",
 			"InputPlaceHolder": "Введите результат",
 			"NewExp":           "Новый пример",
+			"Difficult":        "Выберите сложность",
 		},
 		"en": map[string]string{
 			"ScoreDisplay":     "Score: ",
@@ -68,6 +70,7 @@ func main() {
 			"ResultWrong":      "Wrong!",
 			"InputPlaceHolder": "Enter result",
 			"NewExp":           "New expression",
+			"Difficult":        "Select difficult",
 		},
 	}
 	solver.LangToggler = solver.langTogglerHandler()
@@ -75,6 +78,7 @@ func main() {
 	solverApp.Settings().SetTheme(solver.SolverTheme)
 	solver.ScoreDisplay.TextSize, solver.ExpDisplay.TextSize, solver.ResDisplay.TextSize = solver.TextSize, solver.TextSize, solver.TextSize
 	solver.BtnEnter = solver.enterBtnHandler()
+	solver.SelectDifficult = solver.GetSelectDifficult()
 	window := solverApp.NewWindow("Solver")
 
 	btnExit := widget.NewButton(solver.DataByLang[solver.Lang]["btnExit"], func() {
@@ -84,7 +88,8 @@ func main() {
 	content := container.NewGridWithColumns(
 		1,
 		container.NewGridWithColumns(
-			3,
+			4,
+			solver.SelectDifficult,
 			solver.ScoreDisplay,
 			solver.ExpDisplay,
 			solver.ResDisplay,
@@ -109,14 +114,22 @@ func (solver *Solver) enterBtnHandler() *widget.Button {
 		var res int
 		if solver.Action == " + " {
 			res = solver.Val1 + solver.Val2
-		} else {
+		} else if solver.Action == " - " {
 			res = solver.Val1 - solver.Val2
+		} else if solver.Action == " * " {
+			res = solver.Val1 * solver.Val2
+		} else if solver.Action == " / " {
+			res = solver.Val1 / solver.Val2
 		}
 		userRes, err := strconv.Atoi(solver.UserResult)
 		if err == nil {
 			if res == userRes {
 				solver.ResDisplay.Text = solver.DataByLang[solver.Lang]["ResultRight"]
-				solver.Score = solver.Score + 1
+				accruedPoint := solver.Difficult
+				if accruedPoint == 0 {
+					accruedPoint += 1
+				}
+				solver.Score = solver.Score + accruedPoint
 				solver.setScoreVal()
 				solver.btnDisable(solver.BtnEnter)
 				solver.ResDisplay.Refresh()
@@ -184,7 +197,22 @@ func (solver *Solver) refreshAllCanvas() {
 	strBuilder.WriteString(strconv.Itoa(solver.Score))
 	solver.ScoreDisplay.Text = strBuilder.String()
 	strBuilder.Reset()
+	solver.SelectDifficult.PlaceHolder = solver.DataByLang[solver.Lang]["Difficult"]
 	solver.ExpDisplay.Refresh()
 	solver.ResDisplay.Refresh()
 	solver.ScoreDisplay.Refresh()
+	solver.SelectDifficult.Refresh()
+}
+
+func (solver *Solver) GetSelectDifficult() *widget.Select {
+	resp := widget.NewSelect([]string{"1", "2", "3", "4"}, func(value string) {
+		mappedDiff := map[string]int{"1": 1, "2": 2, "3": 3, "4": 4}
+		if _, ok := mappedDiff[value]; ok {
+			solver.Difficult = mappedDiff[value]
+		} else {
+			solver.Difficult = mappedDiff["1"]
+		}
+	})
+	resp.PlaceHolder = solver.DataByLang[solver.Lang]["Difficult"]
+	return resp
 }
