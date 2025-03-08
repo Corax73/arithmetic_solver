@@ -9,7 +9,7 @@ const MEDIUM_DIFFICULT_LEVEL = 3
 
 var simpleActionsMap = map[int][]string{1: {" + ", " - "}}
 var fullActionsMap = map[int][]string{4: {" + ", " - ", " * ", " / "}}
-var sumLimitMap = map[int][]int{1: {0, 10}, 2: {0, 20}, 3: {0, 100}, 4: {0, 1000}}
+var sumLimitMap = map[int]int{1: 10, 2: 20, 3: 100, 4: 1000}
 var randLimitMap = map[int][]int{1: {0, 6}, 2: {0, 11}, 3: {10, 51}, 4: {10, 501}}
 
 func GetRandomValues(difficult int) (int, int, int, string, string) {
@@ -47,30 +47,35 @@ func GetRandomValues(difficult int) (int, int, int, string, string) {
 	return val1, val2, val3, action1, action2
 }
 
-func getSimpleData(randLimit, sumLimit []int) (int, int) {
+func getSimpleData(randLimit []int, sumLimit int) (int, int) {
 reRand:
 	val1 := rand.Intn(randLimit[1]) + randLimit[0]
 	val2 := rand.Intn(randLimit[1]) + randLimit[0]
-	if val1 < val2 && val1+val2 <= sumLimit[1] {
+	if val1 < val2 && val1+val2 <= sumLimit {
 		valTemp := val1
 		val1 = val2
 		val2 = valTemp
-	} else if val1+val2 > sumLimit[1] {
+	} else if val1+val2 > sumLimit {
 		goto reRand
 	}
 	return val1, val2
 }
 
-func getMediumData(randLimit, sumLimit []int) (int, int, int) {
+func getMediumData(randLimit []int, sumLimit int) (int, int, int) {
 reRand:
 	val1 := rand.Intn(randLimit[1]) + randLimit[0]
 	val2 := rand.Intn(randLimit[1]) + randLimit[0]
 	val3 := rand.Intn(randLimit[1]) + randLimit[0]
-	if val1 < val2 && val1+val2+val3 <= sumLimit[1] {
+	if val1 < val2 &&
+		val1+val2+val3 <= sumLimit &&
+		val1-val2-val3 > 0 &&
+		val1+val2-val3 > 0 {
 		valTemp := val1
 		val1 = val2
 		val2 = valTemp
-	} else if val1+val2+val3 > sumLimit[1] {
+	} else if val1+val2+val3 > sumLimit ||
+		val1-val2-val3 < 0 ||
+		val1+val2-val3 < 0 {
 		goto reRand
 	}
 	return val1, val2, val3
