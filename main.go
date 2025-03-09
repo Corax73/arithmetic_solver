@@ -19,7 +19,7 @@ const SIMPLE_DIFFICULT_LEVEL = 2
 type State struct {
 	Val1, Val2, Val3, Score, Difficult int
 	Action1, Action2, UserResult, Lang string
-	IsError                            bool
+	IsError, IsResultRight, IsWasInput bool
 }
 
 type Internationalization struct {
@@ -107,7 +107,7 @@ func main() {
 	solver.newExpression()
 	window.SetContent(content)
 	window.CenterOnScreen()
-	window.Resize(fyne.NewSize(800, 600))
+	window.Resize(fyne.NewSize(880, 600))
 	window.ShowAndRun()
 }
 
@@ -136,9 +136,12 @@ func (solver *Solver) EnterBtnHandler() *widget.Button {
 			}
 		}
 		userRes, err := strconv.Atoi(solver.UserResult)
+		solver.IsWasInput = true
 		if err == nil {
 			if res == userRes {
+				solver.IsError = false
 				solver.ResDisplay.Text = solver.DataByLang[solver.Lang]["ResultRight"]
+				solver.IsResultRight = true
 				accruedPoint := solver.Difficult
 				if accruedPoint == 0 {
 					accruedPoint += 1
@@ -149,6 +152,7 @@ func (solver *Solver) EnterBtnHandler() *widget.Button {
 				solver.ResDisplay.Refresh()
 			} else {
 				solver.ResDisplay.Text = solver.DataByLang[solver.Lang]["ResultWrong"]
+				solver.IsResultRight = false
 				solver.ResDisplay.Refresh()
 			}
 		} else {
@@ -185,6 +189,9 @@ func (solver *Solver) newExpression() {
 	solver.ResDisplay.Text = ""
 	solver.ResDisplay.Refresh()
 	solver.btnEnable(solver.BtnEnter)
+	solver.IsResultRight = false
+	solver.IsError = false
+	solver.IsWasInput = false
 	solver.setScoreVal()
 }
 
@@ -228,6 +235,18 @@ func (solver *Solver) refreshAllCanvas() {
 	solver.Input.Refresh()
 	solver.ScoreDisplay.Refresh()
 	solver.SelectDifficult.Refresh()
+	if solver.IsWasInput {
+		if solver.IsResultRight {
+			solver.ResDisplay.Text = solver.DataByLang[solver.Lang]["ResultRight"]
+			solver.ResDisplay.Refresh()
+		} else {
+			solver.ResDisplay.Text = solver.DataByLang[solver.Lang]["ResultWrong"]
+			solver.ResDisplay.Refresh()
+		}
+	} else {
+		solver.ResDisplay.Text = ""
+		solver.ResDisplay.Refresh()
+	}
 	if solver.IsError {
 		solver.ResDisplay.Text = solver.DataByLang[solver.Lang]["AppError"]
 		solver.ResDisplay.Refresh()
